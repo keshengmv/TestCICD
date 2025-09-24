@@ -1,0 +1,40 @@
+name: Windows Forms CI/CD
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Restore dependencies
+      run: dotnet restore Test_CICD.sln
+
+    - name: Build
+      run: dotnet build Test_CICD.sln --configuration Release --no-restore
+
+    - name: Run tests (if applicable)
+      run: dotnet test Test_CICD.sln --no-build --verbosity normal
+
+    - name: Publish
+      run: dotnet publish Test_CICD.sln -c Release -o output
+
+    - name: Publish build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: WindowsFormsApp
+        path: output/**
